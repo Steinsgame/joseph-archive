@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,44 +8,36 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* Define custom colors in Tailwind config for clean use */
-        tailwind.config= {
+        tailwind.config = {
             theme: {
                 extend: {
                     colors: {
                         'navy': '#29335C',
-                            'saffron': '#E8C547',
-                            'cream': '#FDF8F0',
-                            'slate-soft': '#747C92',
+                        'saffron': '#E8C547',
+                        'cream': '#FDF8F0',
+                        'slate-soft': '#747C92',
                     }
                 }
             }
         }
-
+        
         /* Custom scrollbar styling for elegance */
         ::-webkit-scrollbar {
             width: 8px;
         }
-
         ::-webkit-scrollbar-thumb {
-            background-color: #E8C547;
-            /* Saffron */
+            background-color: #E8C547; /* Saffron */
             border-radius: 4px;
         }
-
         ::-webkit-scrollbar-track {
-            background: #FDF8F0;
-            /* Cream */
+            background: #FDF8F0; /* Cream */
         }
-
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #FDF8F0;
-            /* Soft Cream background */
-            color: #29335C;
-            /* Deep Navy text for contrast */
+            background-color: #FDF8F0; /* Soft Cream background */
+            color: #29335C; /* Deep Navy text for contrast */
             transition: background-color 0.5s;
         }
-
         /* Style for the Spotify iframe container to ensure responsiveness */
         .spotify-container {
             position: relative;
@@ -55,7 +46,6 @@
             overflow: hidden;
             max-width: 100%;
         }
-
         .spotify-container iframe {
             position: absolute;
             top: 0;
@@ -66,46 +56,26 @@
             box-shadow: 0 4px 10px -1px rgba(41, 51, 92, 0.2);
         }
 
-        /* Loading Spinner */
-        .loader {
-            border: 4px solid #E5E7EB;
-            border-top: 4px solid #E8C547;
-            /* Saffron */
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            display: inline-block;
-        }
-
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
+        /* Loading Spinner - Removed since the Firebase logic is stripped out */
+        .loader { display: none; }
+        
         /* Card base style for a clean, magazine look */
         .poetic-canvas-card {
             background-color: #ffffff;
             border: 1px solid #e5e7eb;
-            box-shadow: 0 15px 30px -10px rgba(41, 51, 92, 0.15);
-            /* Subtle Navy shadow */
+            box-shadow: 0 15px 30px -10px rgba(41, 51, 92, 0.15); /* Subtle Navy shadow */
         }
 
         /* Styling for the refined header title */
         .artistic-title {
-            font-size: 2.5rem;
+            font-size: 2.5rem; 
             line-height: 1.2;
             font-weight: 700;
-            letter-spacing: -0.02em;
+            letter-spacing: -0.02em; 
         }
 
         @media (min-width: 640px) {
-            .artistic-title {
+             .artistic-title {
                 font-size: 3rem;
             }
         }
@@ -113,80 +83,24 @@
         /* Image Styling for structured sections: ensures single-column flow */
         .section-image-stacked {
             width: 100%;
-            max-height: 250px;
+            max-height: 250px; 
             object-fit: cover;
             border-radius: 0.5rem;
             box-shadow: 0 4px 8px -1px rgba(0, 0, 0, 0.15);
             border: 2px solid #fcf6e7;
-            margin-bottom: 1.5rem;
-            /* Space below image */
+            margin-bottom: 1.5rem; /* Space below image */
         }
-
-        /* The original code for the images uses a clever logic to switch between 
-           system IDs (PREFILL) and relative paths (DEFAULT_IMG). For this final deployment
-           file, we MUST hardcode the relative paths directly into the HTML and remove
-           all the complex storage logic. */
 
         .reflection-image {
             width: 100%;
             height: auto;
             object-fit: cover;
         }
-
-        /* Clearfix is no longer needed since floats are removed */
-        .clearfix {
-            display: none;
-        }
     </style>
 
-    <!-- Firebase SDKs -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot, collection, query, addDoc, serverTimestamp, orderBy, limit, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // Set Firebase log level to debug for deployment
-        setLogLevel('Debug');
-
-        // --- Core Firebase Initialization ---
-        // These are required for the live commenting feature
-        const appId = 'default-app-id'; // Replaced with a placeholder value
-        const firebaseConfig = JSON.parse(JSON.stringify({ "apiKey": "AIzaSy...", "projectId": "some-project" })); // Placeholder config
-        const initialAuthToken = null; // No token available in production deployment
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-
-        let userId = null;
-        let isAuthReady = false;
-
-        // --- DOM Elements ---
-        let currentWriteupDisplayIntro, currentWriteupDisplayOutward,
-            currentWriteupDisplayInward, currentWriteupDisplayAudience, currentSpotifyEmbed, commentList,
-            commentInput, postCommentBtn, loader, contentContainer, mainTitle;
-
-        // Function to look up all necessary DOM elements
-        const setupDOMElements = () => {
-            currentWriteupDisplayIntro = document.getElementById('current-writeup-intro');
-            currentWriteupDisplayOutward = document.getElementById('current-writeup-outward');
-            currentWriteupDisplayInward = document.getElementById('current-writeup-inward');
-            currentWriteupDisplayAudience = document.getElementById('current-writeup-audience');
-            currentSpotifyEmbed = document.getElementById('current-spotify-embed');
-            commentList = document.getElementById('comment-list');
-            commentInput = document.getElementById('comment-input');
-            postCommentBtn = document.getElementById('post-comment-btn');
-            loader = document.getElementById('loader');
-            contentContainer = document.getElementById('content-container');
-            mainTitle = document.getElementById('main-title');
-
-            // Attach event listener for posting comments
-            if (postCommentBtn) postCommentBtn.addEventListener('click', postComment);
-        };
-
-
-        // --- Default Content (Hardcoded for Deployment) ---
+    <!-- Content Display Logic (Simplified for static deployment) -->
+    <script>
+        // --- Hardcoded Content for Deployment ---
         const WRITEUP_TEXT = `Another day staring at my face, pondering around three crucial questions:
 1. What do I reflect?
 2. What do I see?
@@ -201,33 +115,18 @@ I do see the bright eyes and somewhat pleasing features, but beyond that, I see 
 [SECTION: AUDIENCE]
 What about them? What do they see? This is my question to the readers of this: With what words would you describe the girl behind the mirror? What stories does my reflection show? Can you see the real me, or only what I project?`;
 
-        const SPOTIFY_EMBED = `<iframe data-testid="embed-iframe" style="border-radius:12px" src="https://open.spotify.com/embed/track/4rHZZAmHpZrA3iH5zx8frV?utm_source=generator" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>`;
+        const SPOTIFY_EMBED = `<iframe style="border-radius:12px" src="https://open.spotify.com/embed/track/4rHZZAmHpZrA3iH5zx8frV?utm_source=generator" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>`;
+        
+        // --- Image Paths (Relative paths for GitHub Pages) ---
+        const IMG_MAIN = 'pictures/myreflec.png';
+        const IMG_OUTWARD = 'pictures/what do i reflect.png';
+        const IMG_INWARD = 'pictures/What do i see.png';
+        const IMG_AUDIENCE = 'pictures/what do they see.png';
 
-        // --- Firestore Paths (Simplified for public comments) ---
-        const getCommentsCollectionRef = () => collection(db, 'artifacts', 'josephs-archive', 'public', 'data', 'comments'); // Hardcoded app ID for public comments
-
-
-        // --- Helper Functions ---
-        const showMessage = (msg, isError = false) => {
-            console.log(isError ? `[ERROR] ${msg}` : `[INFO] ${msg}`);
-            // In the deployed version, we rely only on the console for simple messages.
-        };
-
-        const updateSpotifyEmbed = (url) => {
-            const container = currentSpotifyEmbed;
-            if (!container) return;
-
-            container.innerHTML = '';
-            if (url) {
-                container.innerHTML = `<div class="spotify-container">${url}</div>`;
-            } else {
-                container.innerHTML = `<div class="text-slate-soft text-center py-8">No Spotify music embedded yet.</div>`;
-            }
-        };
 
         const parseWriteup = (fullText) => {
             const sections = fullText.split(/\[SECTION:\s*(OUTWARD|INWARD|AUDIENCE)\]/i).map(s => s.trim()).filter(s => s.length > 0);
-
+            
             let intro = sections[0] || '';
             let outward = '';
             let inward = '';
@@ -245,144 +144,35 @@ What about them? What do they see? This is my question to the readers of this: W
             return { intro, outward, inward, audience };
         };
 
-        const updateWriteupDisplay = (data) => {
-            if (!currentWriteupDisplayIntro) return;
+        const initializeContent = () => {
+            const { intro, outward, inward, audience } = parseWriteup(WRITEUP_TEXT);
 
-            const { intro, outward, inward, audience } = parseWriteup(data.writeupText);
+            // 1. Update Images
+            document.getElementById('img-main-el').src = IMG_MAIN;
+            document.getElementById('img-outward-el').src = IMG_OUTWARD;
+            document.getElementById('img-inward-el').src = IMG_INWARD;
+            document.getElementById('img-audience-el').src = IMG_AUDIENCE;
 
-            currentWriteupDisplayIntro.innerText = intro;
-            currentWriteupDisplayOutward.innerText = outward;
-            currentWriteupDisplayInward.innerText = inward;
-            currentWriteupDisplayAudience.innerText = audience;
-        };
+            // 2. Update Text
+            document.getElementById('current-writeup-intro').innerText = intro;
+            document.getElementById('current-writeup-outward').innerText = outward;
+            document.getElementById('current-writeup-inward').innerText = inward;
+            document.getElementById('current-writeup-audience').innerText = audience;
 
-
-        const formatDate = (timestamp) => {
-            if (!timestamp) return 'Just now';
-            if (timestamp.toDate) {
-                return timestamp.toDate().toLocaleDateString('en-US', {
-                    year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
-                });
+            // 3. Update Spotify
+            const container = document.getElementById('current-spotify-embed');
+            if (container) {
+                container.innerHTML = `<div class="spotify-container">${SPOTIFY_EMBED}</div>`;
             }
-            return new Date(timestamp).toLocaleDateString('en-US', {
-                year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
-            });
+            
+            // 4. Hide Loader and Show Content
+            document.getElementById('loader').classList.add('hidden');
+            document.getElementById('content-container').classList.remove('hidden');
         };
 
-        // --- Firestore Comment Handler ---
-        const postComment = async () => {
-            if (!userId) {
-                showMessage('Authentication not ready. Cannot post comment.', true);
-                return;
-            }
-
-            const commentText = commentInput.value.trim();
-            if (!commentText) {
-                showMessage('Comment cannot be empty.', true);
-                return;
-            }
-
-            postCommentBtn.disabled = true;
-            postCommentBtn.innerHTML = '<span class="loader w-4 h-4 border-white border-t-saffron"></span> Posting...';
-
-            try {
-                await addDoc(getCommentsCollectionRef(), {
-                    userId: userId,
-                    text: commentText,
-                    timestamp: serverTimestamp()
-                });
-                commentInput.value = ''; // Clear input on success
-            } catch (error) {
-                showMessage(`Failed to post comment: ${error.message}`, true);
-            } finally {
-                postCommentBtn.disabled = false;
-                postCommentBtn.innerHTML = 'Post Comment';
-            }
-        };
-
-
-        // 2. Load/Post Comments 
-        const loadComments = () => {
-            const commentsCollection = getCommentsCollectionRef();
-            const q = query(commentsCollection, orderBy('timestamp', 'desc'), limit(50));
-
-            onSnapshot(q, (snapshot) => {
-                if (!commentList) return;
-                commentList.innerHTML = '';
-                if (snapshot.empty) {
-                    commentList.innerHTML = '<p class="text-center text-gray-500 py-4">No comments yet. Be the first!</p>';
-                    return;
-                }
-
-                snapshot.forEach(doc => {
-                    const comment = doc.data();
-                    const commentId = doc.id;
-                    const isOwner = comment.userId === userId;
-
-                    const commentEl = document.createElement('div');
-                    commentEl.className = 'p-4 bg-white rounded-xl shadow-sm mb-3 border border-gray-100';
-                    commentEl.innerHTML = `
-                        <div class="flex justify-between items-start">
-                            <div class="font-bold text-navy text-sm break-all">
-                                User: ${comment.userId.substring(0, 12)}...
-                            </div>
-                            <div class="text-xs text-slate-soft">
-                                ${formatDate(comment.timestamp)}
-                            </div>
-                        </div>
-                        <p class="mt-2 text-gray-800 whitespace-pre-wrap">${comment.text}</p>
-                        ${isOwner ? `<button data-id="${commentId}" class="delete-btn mt-2 text-xs font-semibold text-red-500 hover:text-red-700 transition duration-150">Delete</button>` : ''}
-                    `;
-                    commentList.appendChild(commentEl);
-                });
-
-                commentList.querySelectorAll('.delete-btn').forEach(button => {
-                    button.addEventListener('click', async (e) => {
-                        const idToDelete = e.target.getAttribute('data-id');
-                        try {
-                            await deleteDoc(doc(getCommentsCollectionRef(), idToDelete));
-                        } catch (error) {
-                            showMessage(`Error deleting comment: ${error.message}`, true);
-                        }
-                    });
-                });
-            });
-        };
-
-
-        // --- Authentication & Main App Start ---
-        const startApp = () => {
-            setupDOMElements();
-
-            // Hardcoded display of content since editor/Firestore config is removed for deployment
-            updateWriteupDisplay({ writeupText: WRITEUP_TEXT });
-            updateSpotifyEmbed(SPOTIFY_EMBED);
-
-            // Immediately sign in anonymously for commenting
-            signInAnonymously(auth).then((userCredential) => {
-                userId = userCredential.user.uid;
-                isAuthReady = true;
-                loadComments();
-
-                if (loader && contentContainer) {
-                    loader.classList.add('hidden');
-                    contentContainer.classList.remove('hidden');
-                }
-
-            }).catch((error) => {
-                showMessage(`Authentication failed: ${error.message}. Comments disabled.`, true);
-                if (loader && contentContainer) {
-                    loader.classList.add('hidden');
-                    contentContainer.classList.remove('hidden');
-                }
-            });
-        };
-
-        window.addEventListener('DOMContentLoaded', startApp);
-
+        window.addEventListener('DOMContentLoaded', initializeContent);
     </script>
 </head>
-
 <body class="min-h-screen p-4 sm:p-8">
 
     <!-- Header and Main Title -->
@@ -395,7 +185,7 @@ What about them? What do they see? This is my question to the readers of this: W
 
     <div id="loader" class="text-center p-20">
         <div class="loader mx-auto mb-4"></div>
-        <p class="text-gray-600">Loading website content and comments...</p>
+        <p class="text-gray-600">Loading website content...</p>
     </div>
 
     <!-- Main Content Container (Hidden until loading is complete) -->
@@ -403,11 +193,10 @@ What about them? What do they see? This is my question to the readers of this: W
 
         <!-- ARTICLE CARD -->
         <section class="poetic-canvas-card p-6 sm:p-12 rounded-3xl mb-12">
-
+            
             <!-- SPOTIFY SECTION -->
             <div class="mb-10 pb-8 border-b border-gray-100">
-                <h3 class="text-xl font-bold text-navy mb-4 border-b-2 border-saffron pb-1 inline-block">The Soundtrack
-                    to this Reflection</h3>
+                <h3 class="text-xl font-bold text-navy mb-4 border-b-2 border-saffron pb-1 inline-block">The Soundtrack to this Reflection</h3>
                 <div id="current-spotify-embed">
                     <!-- Spotify Embed will be injected here -->
                 </div>
@@ -420,20 +209,20 @@ What about them? What do they see? This is my question to the readers of this: W
                     — For the girl in the mirror.
                 </p>
 
-                <!-- Full Width Image -->
+                <!-- Full Width Image - Reduced Height and Centered -->
                 <div class="w-full text-center mb-10">
-                    <div
-                        class="overflow-hidden inline-block rounded-xl shadow-2xl border-4 border-saffron-100 max-h-96 w-full lg:w-3/4">
-                        <img id="img-main-el" src="pictures/myreflec.png"
-                            alt="A striking image of a girl looking at her reflection in an ornate mirror."
-                            class="reflection-image"
-                            style="aspect-ratio: 16/9; object-fit: cover; object-position: center;" />
+                    <div class="overflow-hidden inline-block rounded-xl shadow-2xl border-4 border-saffron-100 max-h-96 w-full lg:w-3/4">
+                        <img id="img-main-el"
+                            src="pictures/myreflec.png" 
+                            alt="A striking image of a girl looking at her reflection in an ornate mirror." 
+                            class="reflection-image" 
+                            style="aspect-ratio: 16/9; object-fit: cover; object-position: center;"
+                        />
                     </div>
                 </div>
 
                 <!-- Introduction Text -->
-                <div
-                    class="writeup-display space-y-6 text-gray-700 leading-relaxed border-l-4 border-slate-soft pl-6 py-2">
+                <div class="writeup-display space-y-6 text-gray-700 leading-relaxed border-l-4 border-slate-soft pl-6 py-2">
                     <p id="current-writeup-intro" class="whitespace-pre-wrap italic text-lg leading-loose">
                         Loading the introduction and key questions...
                     </p>
@@ -442,16 +231,17 @@ What about them? What do they see? This is my question to the readers of this: W
 
             <!-- STRUCTURED REFLECTION SECTIONS (Book Format) -->
             <div class="space-y-12 pt-6">
-
+                
                 <!-- 1. WHAT DO I REFLECT? (Outward) -->
                 <div class="pt-6 border-t border-gray-100">
-                    <h4 class="text-3xl font-bold text-navy mb-6 border-b border-saffron pb-1 inline-block">What Do I
-                        Reflect?</h4>
-
+                    <h4 class="text-3xl font-bold text-navy mb-6 border-b border-saffron pb-1 inline-block">What Do I Reflect?</h4>
+                    
                     <div class="w-full text-center mb-6">
-                        <img id="img-outward-el" src="pictures/what do i reflect.png"
-                            alt="Image symbolizing external appearance or projection."
-                            class="section-image-stacked inline-block max-w-full md:max-w-md" />
+                        <img id="img-outward-el"
+                            src="pictures/what do i reflect.png" 
+                            alt="Image symbolizing external appearance or projection." 
+                            class="section-image-stacked inline-block max-w-full md:max-w-md"
+                        />
                     </div>
 
                     <div class="text-gray-700 leading-relaxed">
@@ -463,15 +253,16 @@ What about them? What do they see? This is my question to the readers of this: W
 
                 <!-- 2. WHAT DO I SEE? (Inward) -->
                 <div class="pt-6 border-t border-gray-100">
-                    <h4 class="text-3xl font-bold text-navy mb-6 border-b border-saffron pb-1 inline-block">What Do I
-                        See?</h4>
-
+                    <h4 class="text-3xl font-bold text-navy mb-6 border-b border-saffron pb-1 inline-block">What Do I See?</h4>
+                    
                     <div class="w-full text-center mb-6">
-                        <img id="img-inward-el" src="pictures/What do i see.png"
-                            alt="Image symbolizing an inner world or struggle."
-                            class="section-image-stacked inline-block max-w-full md:max-w-md" />
+                        <img id="img-inward-el"
+                            src="pictures/What do i see.png" 
+                            alt="Image symbolizing an inner world or struggle." 
+                            class="section-image-stacked inline-block max-w-full md:max-w-md"
+                        />
                     </div>
-
+                    
                     <div class="text-gray-700 leading-relaxed">
                         <p id="current-writeup-inward" class="whitespace-pre-wrap italic text-lg leading-loose">
                             Loading inward reflection text...
@@ -481,15 +272,16 @@ What about them? What do they see? This is my question to the readers of this: W
 
                 <!-- 3. WHAT DO THEY SEE? (Audience) -->
                 <div class="pt-6 border-t border-gray-100">
-                    <h4 class="text-3xl font-bold text-navy mb-6 border-b border-saffron pb-1 inline-block">What Do They
-                        See?</h4>
-
+                    <h4 class="text-3xl font-bold text-navy mb-6 border-b border-saffron pb-1 inline-block">What Do They See?</h4>
+                    
                     <div class="w-full text-center mb-6">
-                        <img id="img-audience-el" src="pictures/what do they see.png"
-                            alt="Image symbolizing an outside perspective or audience."
-                            class="section-image-stacked inline-block max-w-full md:max-w-md" />
+                        <img id="img-audience-el"
+                            src="pictures/what do they see.png" 
+                            alt="Image symbolizing an outside perspective or audience." 
+                            class="section-image-stacked inline-block max-w-full md:max-w-md"
+                        />
                     </div>
-
+                    
                     <div class="text-gray-700 leading-relaxed">
                         <p id="current-writeup-audience" class="whitespace-pre-wrap italic text-lg leading-loose">
                             Loading audience question text...
@@ -499,41 +291,16 @@ What about them? What do they see? This is my question to the readers of this: W
             </div>
             <!-- END STRUCTURED REFLECTION SECTIONS -->
 
-            <!-- Separator for Comment Section -->
-            <div class="mt-10 pt-8 border-t border-gray-100"></div>
-
-        </section>
-
-
-        <!-- Section 3: Comments -->
-        <section class="poetic-canvas-card p-6 sm:p-8 rounded-3xl shadow-lg mb-12 bg-cream">
-            <h2 class="text-2xl font-bold text-navy mb-6">Community Comments</h2>
-
-            <!-- New Comment Form -->
-            <div class="mb-8 p-5 bg-white rounded-xl shadow-md border border-gray-100">
-                <h3 class="text-xl font-semibold text-navy mb-3">Leave a Thought</h3>
-                <textarea id="comment-input" rows="3"
-                    class="w-full p-4 border border-gray-300 rounded-xl focus:ring-saffron focus:border-saffron resize-none bg-white"
-                    placeholder="Share your feelings or feedback..."></textarea>
-                <button id="post-comment-btn"
-                    class="mt-3 px-6 py-2 bg-saffron text-navy font-bold rounded-xl hover:bg-navy hover:text-white transition duration-200 focus:outline-none focus:ring-2 focus:ring-saffron focus:ring-opacity-50">
-                    Post Comment
-                </button>
-            </div>
-
-            <!-- Comment List -->
-            <div id="comment-list" class="space-y-4">
-                <!-- Comments will be injected here by the Firestore listener -->
-                <div class="text-center text-gray-500 py-4">Loading comments...</div>
-            </div>
         </section>
 
     </div>
 
-    <!-- Footer -->
+    <!-- Footer with Disclaimer -->
     <footer class="mt-16 text-center text-sm text-slate-soft pb-8">
-        Built with elegance and real-time persistence by Gemini.
+        <p>
+            **Disclaimer:** The writeup content is authentic and created by Joseph Fadero.
+            The images were generated or sourced using AI technology.
+        </p>
     </footer>
 </body>
-
 </html>
